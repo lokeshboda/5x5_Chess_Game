@@ -1,7 +1,6 @@
 const board = document.getElementById('chessboard');
 const currentPlayerDisplay = document.getElementById('current-player');
 const selectedPieceDisplay = document.getElementById('selected-name');
-const moveHistoryDisplay = document.getElementById('move-history');
 
 let currentPlayer = 'A';
 let selectedPiece = null;
@@ -14,8 +13,7 @@ const initialPieces = [
     ['B-P1', 'B-P2', 'B-H1', 'B-H2', 'B-P3']
 ];
 
-let pieces = JSON.parse(JSON.stringify(initialPieces));
-let moveHistory = [];
+let pieces = JSON.parse(JSON.stringify(initialPieces)); // Deep copy of initial state
 
 function renderBoard() {
     board.innerHTML = '';
@@ -62,7 +60,6 @@ function movePiece(direction) {
     }
 
     renderBoard();
-    updateMoveHistory(name, direction);
 }
 
 function movePawn(row, col, direction) {
@@ -108,33 +105,39 @@ function moveHero1(row, col, direction) {
 }
 
 function moveHero2(row, col, direction) {
+    let newRow = row;
+    let newCol = col;
+
     switch (direction) {
-        case 'L':
-            if (col > 1) col -= 2;
+        case 'FL': // Forward-Left
+            if (row > 1 && col > 1) { newRow = row - 2; newCol = col - 2; }
             break;
-        case 'R':
-            if (col < 3) col += 2;
+        case 'FR': // Forward-Right
+            if (row > 1 && col < 3) { newRow = row - 2; newCol = col + 2; }
             break;
-        case 'F':
-            if (currentPlayer === 'A' && row > 1) row -= 2;
-            else if (currentPlayer === 'B' && row < 3) row += 2;
+        case 'BL': // Backward-Left
+            if (row < 3 && col > 1) { newRow = row + 2; newCol = col - 2; }
             break;
-        case 'B':
-            if (currentPlayer === 'A' && row < 3) row += 2;
-            else if (currentPlayer === 'B' && row > 1) row -= 2;
+        case 'BR': // Backward-Right
+            if (row < 3 && col < 3) { newRow = row + 2; newCol = col + 2; }
             break;
     }
 
-    updatePiecePosition(row, col);
+    // Update piece position only if move is within bounds and capture is allowed
+    if (newRow !== row || newCol !== col) {
+        updatePiecePosition(newRow, newCol);
+    }
 }
 
 function updatePiecePosition(row, col) {
     if (pieces[row][col] === '' || (pieces[row][col] && !pieces[row][col].startsWith(currentPlayer))) {
+        // Capture the opponent's piece if present
         pieces[selectedPiece.row][selectedPiece.col] = '';
         pieces[row][col] = selectedPiece.name;
         selectedPiece.row = row;
         selectedPiece.col = col;
 
+        // Check for a win condition
         if (checkWinCondition()) {
             showWinMessage(currentPlayer);
             return;
@@ -145,6 +148,7 @@ function updatePiecePosition(row, col) {
 }
 
 function checkWinCondition() {
+    // Check if all pieces of the opponent have been eliminated
     const opponent = currentPlayer === 'A' ? 'B' : 'A';
     return pieces.flat().every(piece => !piece || !piece.startsWith(opponent));
 }
@@ -167,18 +171,8 @@ function resetGame() {
     currentPlayerDisplay.innerText = currentPlayer;
     selectedPiece = null;
     selectedPieceDisplay.innerText = 'None';
-    moveHistory = [];
-    renderMoveHistory();
     renderBoard();
 }
 
-function updateMoveHistory(piece, direction) {
-    moveHistory.push(`${piece}: ${direction}`);
-    renderMoveHistory();
-}
-
-function renderMoveHistory() {
-    moveHistoryDisplay.innerHTML = moveHistory.join('<br>');
-}
-
+// Initial render
 renderBoard();
