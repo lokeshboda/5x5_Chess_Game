@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5x5 Chess-Like Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h2>Current Player: <span id="current-player">A</span></h2>
+        <button id="undo-button">Undo</button>
+        <div id="chessboard" class="board"></div>
+        <div id="selected-piece">Selected: <span id="selected-name">None</span></div>
+        <div class="controls">
+            <button onclick="movePiece('L')">L</button>
+            <button onclick="movePiece('R')">R</button>
+            <button onclick="movePiece('F')">F</button>
+            <button onclick="movePiece('B')">B</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
