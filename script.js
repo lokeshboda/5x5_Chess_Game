@@ -1,6 +1,7 @@
 const board = document.getElementById('chessboard');
 const currentPlayerDisplay = document.getElementById('current-player');
 const selectedPieceDisplay = document.getElementById('selected-name');
+const moveHistoryDisplay = document.getElementById('move-history');
 
 let currentPlayer = 'A';
 let selectedPiece = null;
@@ -13,7 +14,8 @@ const initialPieces = [
     ['B-P1', 'B-P2', 'B-H1', 'B-H2', 'B-P3']
 ];
 
-let pieces = JSON.parse(JSON.stringify(initialPieces)); // Deep copy of initial state
+let pieces = JSON.parse(JSON.stringify(initialPieces));
+let moveHistory = [];
 
 function renderBoard() {
     board.innerHTML = '';
@@ -60,6 +62,7 @@ function movePiece(direction) {
     }
 
     renderBoard();
+    updateMoveHistory(name, direction);
 }
 
 function movePawn(row, col, direction) {
@@ -127,13 +130,11 @@ function moveHero2(row, col, direction) {
 
 function updatePiecePosition(row, col) {
     if (pieces[row][col] === '' || (pieces[row][col] && !pieces[row][col].startsWith(currentPlayer))) {
-        // Capture the opponent's piece if present
         pieces[selectedPiece.row][selectedPiece.col] = '';
         pieces[row][col] = selectedPiece.name;
         selectedPiece.row = row;
         selectedPiece.col = col;
 
-        // Check for a win condition
         if (checkWinCondition()) {
             showWinMessage(currentPlayer);
             return;
@@ -144,13 +145,12 @@ function updatePiecePosition(row, col) {
 }
 
 function checkWinCondition() {
-    // Check if all pieces of the opponent have been eliminated
     const opponent = currentPlayer === 'A' ? 'B' : 'A';
     return pieces.flat().every(piece => !piece || !piece.startsWith(opponent));
 }
 
 function showWinMessage(winner) {
-    alert(${winner} wins the match!!);
+    alert(`${winner} wins the match!!`);
     resetGame();
 }
 
@@ -167,8 +167,18 @@ function resetGame() {
     currentPlayerDisplay.innerText = currentPlayer;
     selectedPiece = null;
     selectedPieceDisplay.innerText = 'None';
+    moveHistory = [];
+    renderMoveHistory();
     renderBoard();
 }
 
-// Initial render
+function updateMoveHistory(piece, direction) {
+    moveHistory.push(`${piece}: ${direction}`);
+    renderMoveHistory();
+}
+
+function renderMoveHistory() {
+    moveHistoryDisplay.innerHTML = moveHistory.join('<br>');
+}
+
 renderBoard();
